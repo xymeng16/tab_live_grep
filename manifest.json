@@ -1,0 +1,21 @@
+{
+  "manifest_version": 3,
+  "name": "Tab Live Grep",
+  "version": "1.0",
+  "description": "快速搜索和切换浏览器标签页",
+  "action": {},
+  "commands": {
+    "_execute_action": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+K",
+        "mac": "Command+Shift+K"
+      },
+      "description": "打开标签页搜索"
+    }
+  },
+  "permissions": ["tabs", "favicon", "activeTab", "windows"],
+  "host_permissions": ["<all_urls>"],
+  "background": {
+    "service_worker": "background.js"
+  }
+}
