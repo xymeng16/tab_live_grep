@@ -3,9 +3,8 @@ body {
   height: 100%;
   margin: 0;
   padding: 0;
-  font-family:
-    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
-    Cantarell, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+    Ubuntu, Cantarell, sans-serif;
   background: #f5f5f5;
 }
 
@@ -37,6 +36,8 @@ body {
   padding: 8px 0;
   height: calc(100vh - 72px);
   overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 .tab-item {
@@ -100,7 +101,6 @@ body {
   font-size: 14px;
 }
 
-/* 滚动条样式 */
 ::-webkit-scrollbar {
   width: 8px;
 }
@@ -116,4 +116,18 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: #a8a8a8;
+}
+
+html {
+  overflow: hidden;
+}
+
+body {
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+}
+
+.results-container::-webkit-scrollbar {
+  display: none;
 }
