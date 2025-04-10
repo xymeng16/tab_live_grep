@@ -1,14 +1,18 @@
 // 初始化变量
 let allTabs = [];
+let sortedTabs = []; // 新增：用于存储按时间排序的副本
 let fuse;
 let selectedIndex = -1;
 
 // 初始化搜索功能
 async function initSearch() {
-  // 获取所有标签页
+  // 获取所有标签页并包含lastAccessed属性
   allTabs = await chrome.tabs.query({});
 
-  // 初始化 Fuse.js
+  // 创建时间排序副本（直接用于初始显示）
+  sortedTabs = [...allTabs].sort((a, b) => b.lastAccessed - a.lastAccessed);
+
+  // 初始化 Fuse.js（保持原始数据用于搜索）
   fuse = new Fuse(allTabs, {
     keys: [
       { name: "title", weight: 0.7 },
@@ -18,6 +22,14 @@ async function initSearch() {
     includeMatches: true,
     ignoreLocation: true,
     minMatchCharLength: 2,
+    shouldSort: true,
+    sortFn: (a, b) => {
+      if (a.score !== b.score) {
+        return a.score - b.score;
+      } else {
+        return b.item.lastAccessed - a.item.lastAccessed;
+      }
+    },
   });
 
   // 监听输入变化
@@ -25,20 +37,22 @@ async function initSearch() {
   searchInput.addEventListener("input", handleSearch);
   searchInput.addEventListener("keydown", handleKeyDown);
 
-  // 初始显示所有标签页
-  displayResults(allTabs.map((tab) => ({ item: tab })));
+  // 初始显示按时间排序的标签页
+  displayResults(sortedTabs.map((tab) => ({ item: tab })));
 }
 
-// 处理搜索
+// 处理搜索逻辑（新增时间排序处理）
 function handleSearch(e) {
   const query = e.target.value.trim();
   selectedIndex = -1;
 
   if (query === "") {
-    displayResults(allTabs.map((tab) => ({ item: tab })));
+    // 查询为空时直接显示时间排序结果
+    displayResults(sortedTabs.map((tab) => ({ item: tab })));
     return;
   }
 
+  // 执行搜索并按规则排序
   const results = fuse.search(query);
   displayResults(results);
 }
@@ -67,10 +81,13 @@ function displayResults(results) {
       tab.url,
       result.matches?.find((m) => m.key === "url"),
     );
+    const faviconUrl =
+      tab.favIconUrl ||
+      chrome.runtime.getURL(`chrome://favicon/${encodeURIComponent(tab.url)}`);
 
     html += `
       <div class="tab-item ${isActive ? "active" : ""}" data-tab-id="${tab.id}" data-index="${index}">
-        <img class="favicon" src="${tab.favIconUrl || "chrome://favicon/" + tab.url}">
+        <img class="favicon" src="${faviconUrl}">
         <div class="tab-content">
           <div class="tab-title">${titleHighlight}</div>
           <div class="tab-url">${urlHighlight}</div>

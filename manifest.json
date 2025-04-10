@@ -17,5 +17,11 @@
   "host_permissions": ["<all_urls>"],
   "background": {
     "service_worker": "background.js"
-  }
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["chrome://favicon/*", "edge://favicon/*"],
+      "matches": ["<all_urls>"]
+    }
+  ]
 }
