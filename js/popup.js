@@ -8,6 +8,9 @@ let selectedIndex = -1;
 async function initSearch() {
   // 获取所有标签页并包含lastAccessed属性
   allTabs = await chrome.tabs.query({});
+  allTabs = allTabs.filter(
+    (tab) => !tab.url.startsWith(`chrome-extension://${chrome.runtime.id}/`),
+  );
 
   // 创建时间排序副本（直接用于初始显示）
   sortedTabs = [...allTabs].sort((a, b) => b.lastAccessed - a.lastAccessed);
@@ -37,8 +40,13 @@ async function initSearch() {
   searchInput.addEventListener("input", handleSearch);
   searchInput.addEventListener("keydown", handleKeyDown);
 
-  // 初始显示按时间排序的标签页
-  displayResults(sortedTabs.map((tab) => ({ item: tab })));
+  const query = searchInput.value.trim();
+  if (query != "") {
+    handleSearch({ target: { value: query } });
+  } else {
+    // 初始显示按时间排序的标签页
+    displayResults(sortedTabs.map((tab) => ({ item: tab })));
+  }
 }
 
 // 处理搜索逻辑（新增时间排序处理）
@@ -105,6 +113,11 @@ function displayResults(results) {
       switchToTab(tabId);
     });
   });
+
+  if (results.length > 0) {
+    selectedIndex = 0;
+    updateSelection(); // 立即更新视觉状态
+  }
 }
 
 // 高亮匹配文本
@@ -172,7 +185,15 @@ function handleKeyDown(e) {
         switchToTab(tabId);
       }
       break;
-
+    case "Delete": // 新增：处理删除键
+      e.preventDefault();
+      if (selectedIndex >= 0) {
+        const tabId = parseInt(
+          results[selectedIndex].getAttribute("data-tab-id"),
+        );
+        closeTab(tabId); // 调用关闭标签函数
+      }
+      break;
     case "Escape":
       window.close();
       break;
@@ -196,6 +217,17 @@ function updateSelection() {
 function switchToTab(tabId) {
   chrome.tabs.update(tabId, { active: true });
   window.close();
+}
+
+// 新增：关闭标签函数
+async function closeTab(tabId) {
+  try {
+    await chrome.tabs.remove(tabId);
+    // 重新初始化搜索以更新列表
+    await initSearch();
+  } catch (error) {
+    console.error("关闭标签失败:", error);
+  }
 }
 
 // 初始化
