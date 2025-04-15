@@ -114,8 +114,8 @@ function displayResults(results) {
     });
   });
 
-  if (results.length > 0) {
-    selectedIndex = 0;
+  if (results.length > 1) {
+    selectedIndex = 1;
     updateSelection(); // 立即更新视觉状态
   }
 }
