@@ -22,16 +22,19 @@ async function initSearch() {
       { name: "url", weight: 0.3 },
     ],
     threshold: 0.4,
+    // includeScore: true,
     includeMatches: true,
     ignoreLocation: true,
     minMatchCharLength: 2,
     shouldSort: true,
     sortFn: (a, b) => {
-      if (a.score !== b.score) {
-        return a.score - b.score;
-      } else {
-        return b.item.lastAccessed - a.item.lastAccessed;
-      }
+      return a.score === b.score
+        ? a.item.lastAccessed < b.item.lastAccessed
+          ? 1
+          : -1
+        : a.score < b.score
+          ? -1
+          : 1;
     },
   });
 
